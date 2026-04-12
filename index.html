@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>台灣森林演替互動儀表板</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>台灣森林演替互動儀表板</h1>
+      <p>探索海拔與干擾情境下，森林從先驅期到成熟林的變化。</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <h2>情境設定</h2>
+
+        <label for="elevation">海拔帶</label>
+        <select id="elevation">
+          <option value="low">低海拔（&lt; 1000m）</option>
+          <option value="mid" selected>中海拔（1000–2500m）</option>
+          <option value="high">高海拔（&gt; 2500m）</option>
+        </select>
+
+        <label for="disturbance">干擾強度</label>
+        <select id="disturbance">
+          <option value="low">低（零星倒木、微擾）</option>
+          <option value="medium" selected>中（颱風、局部崩塌）</option>
+          <option value="high">高（火災、大規模崩塌）</option>
+        </select>
+
+        <label for="yearRange">演替年數：<span id="yearLabel">50</span> 年</label>
+        <input id="yearRange" type="range" min="1" max="200" value="50" />
+
+        <button id="playBtn" type="button">自動播放演替</button>
+        <p class="hint">資料為教育示意模型，展示演替趨勢而非精確預測。</p>
+      </section>
+
+      <section class="panel chart-panel">
+        <h2>林分組成變化</h2>
+        <canvas id="compositionChart" width="840" height="420" aria-label="森林演替組成圖"></canvas>
+        <div class="legend" id="legend"></div>
+      </section>
+
+      <section class="panel insights">
+        <h2>重點解讀</h2>
+        <ul id="insightList"></ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
