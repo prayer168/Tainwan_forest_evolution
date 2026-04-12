@@ -1,0 +1,151 @@
+:root {
+  --bg: #0b1d17;
+  --panel: #163328;
+  --text: #e5f3eb;
+  --muted: #b7d5c4;
+  --accent: #62d190;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(145deg, #091510, #0e251b);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.hero {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: rgba(9, 28, 21, 0.85);
+  border-bottom: 1px solid rgba(98, 209, 144, 0.3);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.6vw, 2.3rem);
+}
+
+.hero p {
+  margin-top: 0.6rem;
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 300px minmax(0, 1fr);
+  padding: 1rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(98, 209, 144, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 8px 20px var(--shadow);
+  padding: 1rem;
+}
+
+.controls,
+.insights {
+  grid-column: 1;
+}
+
+.chart-panel {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+label,
+select,
+button,
+input {
+  display: block;
+  width: 100%;
+}
+
+label {
+  margin-top: 0.8rem;
+  margin-bottom: 0.3rem;
+  color: var(--muted);
+}
+
+select,
+button,
+input[type="range"] {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #113123;
+  color: var(--text);
+  padding: 0.6rem;
+}
+
+button {
+  margin-top: 1rem;
+  background: #24593f;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #2c694b;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.8rem;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: #f4fbf7;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+#insightList {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .controls,
+  .insights,
+  .chart-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
