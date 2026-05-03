@@ -1,0 +1,17 @@
+{
+  "name": "lesson-plan-api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/app.js",
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

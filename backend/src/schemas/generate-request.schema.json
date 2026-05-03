@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["locale", "script", "generation_mode", "input"],
+  "properties": {
+    "locale": { "type": "string", "const": "zh-TW" },
+    "script": { "type": "string", "const": "traditional_chinese" },
+    "generation_mode": { "type": "string", "enum": ["daily", "deep_public"] },
+    "input": {
+      "type": "object",
+      "required": ["stage", "grade", "subject", "topic", "duration_minutes"],
+      "properties": {
+        "stage": { "type": "string", "enum": ["國小", "國中", "高中"] },
+        "grade": { "type": "string", "minLength": 1 },
+        "subject": { "type": "string", "minLength": 1 },
+        "topic": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "duration_minutes": { "type": "integer", "minimum": 20, "maximum": 120 },
+        "textbook_version": { "type": "string" },
+        "chapter": { "type": "string" },
+        "lesson_type": { "type": "string" },
+        "student_profile": { "type": "string", "maxLength": 1000 },
+        "teaching_style": { "type": "string" },
+        "is_open_class": { "type": "boolean" },
+        "extra_requirements": { "type": "string", "maxLength": 1000 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
