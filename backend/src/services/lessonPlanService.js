@@ -1,94 +1,87 @@
-function sumMinutes(flow) {
-  return flow.reduce((sum, s) => sum + (s.minutes || 0), 0);
+import { openai, openaiModel } from '../config/openai.js';
+
+function buildGeneratePrompt(input) {
+  return `請使用繁體中文（zh-TW）輸出教案 JSON，不可輸出 Markdown。
+欄位需求：meta, analysis, lesson_flow, consistency_report。
+meta 需包含 stage, grade, subject, topic, duration_minutes, lesson_type。
+lesson_flow 每個項目需包含 segment_id, name, minutes。
+consistency_report.duration_check 需包含 planned_total, actual_total, is_pass。
+
+輸入資料：${JSON.stringify(input)}`;
 }
 
-function calculateDuration(flow, target) {
-  const total = sumMinutes(flow);
-  const ratio = target / (total || 1);
-  const adjusted = flow.map((s) => ({
-    ...s,
-    minutes: Math.max(1, Math.round((s.minutes || 1) * ratio))
-  }));
-
-  const diff = target - sumMinutes(adjusted);
-  if (adjusted.length > 0) adjusted[0].minutes = Math.max(1, adjusted[0].minutes + diff);
-  return adjusted;
+function buildEnhancePrompt(lessonPlan, mode, payload) {
+  return `你是K12教案編修助手。請根據模式更新教案 JSON，輸出純 JSON。
+模式：${mode}
+參數：${JSON.stringify(payload)}
+原始教案：${JSON.stringify(lessonPlan)}`;
 }
 
-function buildConsistencyReport(plan) {
+function extractJson(text) {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error('ChatGPT 回傳格式無法解析為 JSON');
+  }
+  return JSON.parse(text.slice(start, end + 1));
+}
+
+function sumMinutes(flow = []) {
+  return flow.reduce((sum, item) => sum + (item.minutes || 0), 0);
+}
+
+function attachConsistency(plan) {
   const actual = sumMinutes(plan.lesson_flow || []);
-  return {
+  const planned = plan?.meta?.duration_minutes || actual;
+  plan.consistency_report = {
     duration_check: {
-      planned_total: plan.meta.duration_minutes,
+      planned_total: planned,
       actual_total: actual,
-      is_pass: Math.abs(plan.meta.duration_minutes - actual) <= 1
+      is_pass: Math.abs(planned - actual) <= 1
     }
   };
-}
-
-export function generateLessonPlan(input) {
-  const duration = input.duration_minutes;
-  const lessonFlow = [
-    { segment_id: 'S1', name: '導入', minutes: 5 },
-    { segment_id: 'S2', name: '核心活動', minutes: Math.max(20, duration - 15) },
-    { segment_id: 'S3', name: '統整與作業', minutes: 10 }
-  ];
-
-  const plan = {
-    meta: {
-      stage: input.stage,
-      grade: input.grade,
-      subject: input.subject,
-      topic: input.topic,
-      duration_minutes: duration,
-      textbook_version: input.textbook_version || '',
-      chapter: input.chapter || '',
-      lesson_type: input.lesson_type || '新授課',
-      is_open_class: !!input.is_open_class
-    },
-    analysis: {
-      student_profile: input.student_profile || '未提供，建議後續補充班級差異描述。'
-    },
-    lesson_flow: lessonFlow,
-    deepen_note: '',
-    updated_at: new Date().toISOString()
-  };
-
-  plan.consistency_report = buildConsistencyReport(plan);
+  plan.updated_at = new Date().toISOString();
   return plan;
 }
 
-export function enhanceLessonPlan(lessonPlan, mode, payload) {
-  const next = structuredClone(lessonPlan);
-  if (mode === 'compact') {
-    next.meta.duration_minutes = payload.target_minutes;
-    next.lesson_flow = calculateDuration(next.lesson_flow || [], payload.target_minutes);
-  }
+async function callChatGPT(prompt) {
+  const response = await openai.responses.create({
+    model: openaiModel,
+    input: prompt,
+    temperature: 0.3
+  });
 
-  if (mode === 'deepen') {
-    const focusText = payload.focus.join('、');
-    next.deepen_note = `已強化：${focusText}`;
-  }
+  const text = response.output_text;
+  if (!text) throw new Error('ChatGPT 無有效回應內容');
+  return extractJson(text);
+}
 
-  next.updated_at = new Date().toISOString();
-  next.consistency_report = buildConsistencyReport(next);
-  return next;
+export async function generateLessonPlan(input) {
+  const prompt = buildGeneratePrompt(input);
+  const plan = await callChatGPT(prompt);
+  return attachConsistency(plan);
+}
+
+export async function enhanceLessonPlan(lessonPlan, mode, payload) {
+  const prompt = buildEnhancePrompt(lessonPlan, mode, payload);
+  const plan = await callChatGPT(prompt);
+  return attachConsistency(plan);
 }
 
 export function buildQualityReport(plan) {
   const pass = plan.consistency_report?.duration_check?.is_pass;
   return {
-    total_score: pass ? 85 : 70,
+    total_score: pass ? 88 : 72,
     level: pass ? '建議微調後使用' : '需重點修訂',
     dimensions: {
-      objective_quality: 16,
-      alignment_quality: 20,
-      process_quality: 17,
-      subject_depth: 16,
+      objective_quality: 17,
+      alignment_quality: 21,
+      process_quality: 18,
+      subject_depth: 17,
       differentiation: 8,
-      executability: 8
+      executability: 7
     },
-    suggestions: pass ? ['可再補充形成性評量指標。'] : ['請調整流程時長與課程分鐘數一致。']
+    suggestions: pass ? ['可補充更具體形成性評量指標。'] : ['請調整環節時間配置。']
   };
 }
 

@@ -18,7 +18,7 @@ const makeId = () => `lp_${Date.now()}_${crypto.randomInt(1000, 10000)}`;
 router.post('/generate', buildValidator(generateSchema), async (req, res) => {
   try {
     const { generation_mode, locale, script, input } = req.body;
-    const lessonPlan = generateLessonPlan(input);
+    const lessonPlan = await generateLessonPlan(input);
     const qualityReport = buildQualityReport(lessonPlan);
     const languageCheck = buildLanguageCheck(lessonPlan);
     const lesson_plan_id = makeId();
@@ -87,7 +87,7 @@ router.post('/:id/enhance', buildValidator(enhanceSchema), async (req, res) => {
   if (error) return res.status(500).json({ message: '查詢 Supabase 失敗', detail: error.message });
   if (!data) return res.status(404).json({ message: '找不到教案' });
 
-  const nextPlan = enhanceLessonPlan(data.lesson_plan_json, req.body.mode, req.body);
+  const nextPlan = await enhanceLessonPlan(data.lesson_plan_json, req.body.mode, req.body);
   const qualityReport = buildQualityReport(nextPlan);
   const languageCheck = buildLanguageCheck(nextPlan);
 
