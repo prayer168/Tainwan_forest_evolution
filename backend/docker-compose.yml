@@ -1,0 +1,9 @@
+services:
+  lesson-plan-api:
+    build: .
+    container_name: lesson-plan-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
